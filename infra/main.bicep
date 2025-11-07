@@ -60,7 +60,7 @@ module api './core/host/appservice.bicep' = {
     location: location
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
-    runtimeVersion: '3.13'
+    runtimeVersion: '3.12'
     appCommandLine: 'gunicorn -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 app.main:app'
     scmDoBuildDuringDeployment: true
     tags: union(tags, { 'azd-service-name': 'api' })
@@ -76,7 +76,7 @@ module frontend './core/host/appservice.bicep' = {
     location: location
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
-    runtimeVersion: '3.13'
+    runtimeVersion: '3.12'
     appCommandLine: 'python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0'
     scmDoBuildDuringDeployment: true
     tags: union(tags, { 'azd-service-name': 'frontend' })
