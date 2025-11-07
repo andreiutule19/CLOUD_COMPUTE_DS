@@ -66,3 +66,48 @@ After deployment, retrieve endpoints with `azd env get-values` or from the Azure
 - The infrastructure uses a shared B1 App Service Plan. Update `infra/main.bicep` if you need a different SKU.
 - Customize environment variables (for example, API authentication) by editing the `appSettings` section in `infra/main.bicep`.
 - When running locally, the Streamlit app defaults to `http://localhost:8000` but respects the `BACKEND_URL` environment variable.
+
+## Deployment Diagram
+
+```mermaid
+flowchart TD
+    subgraph Local
+        Dev[Developer]
+        Repo[GitHub Repo\nbackend + frontend]
+    end
+
+    subgraph CI["GitHub Actions"]
+        WF_API[deploy-backend.yml]
+        WF_UI[deploy-frontend.yml]
+    end
+
+    Dev --> Repo
+    Repo --> WF_API
+    Repo --> WF_UI
+
+    subgraph Azure["Azure Subscription"]
+        RG[Resource Group\nrg-CLOUD_COMPUTING]
+
+        subgraph ASP["App Service Plan\nplan-febm35vpeoy5s"]
+            API[App Service\nFastAPI backend\napp-api-febm35vpeoy5s]
+            UI[App Service\nStreamlit frontend\napp-frontend-febm35vpeoy5s]
+        end
+
+        Storage[(Deployment Package\nZip/OneDeploy)]
+        Logs[(App Service Logs\nLog Stream)]
+    end
+
+    WF_API -->|Publish profile\nOneDeploy| API
+    WF_UI -->|Publish profile\nOneDeploy| UI
+
+    Dev -->|azd up / azd deploy| API
+    Dev -->|azd up / azd deploy| UI
+
+    API -->|JSON API\n/ and /api/hello| UI
+    UI -->|HTTPS| EndUser[Browser Users]
+
+    API -.-> Logs
+    UI -.-> Logs
+    WF_API -.-> Storage
+    WF_UI -.-> Storage
+```
