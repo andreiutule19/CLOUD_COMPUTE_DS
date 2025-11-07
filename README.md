@@ -2,7 +2,7 @@
 
 This repository now hosts two Python services that can be developed locally and deployed to Azure App Service via the Azure Developer CLI (`azd`):
 
-- `backend/` – FastAPI application that renders HTML templates and exposes a JSON API at `/api/hello`.
+- `backend/` – FastAPI application that exposes a JSON API at `/api/hello`.
 - `frontend/` – Streamlit application that calls the FastAPI API and renders an interactive UI.
 - `infra/` – Bicep templates used by `azd` to provision shared Azure infrastructure (App Service Plan, two App Services, logging).
 
@@ -12,8 +12,6 @@ This repository now hosts two Python services that can be developed locally and 
 backend/
   app/
     main.py
-    static/
-    templates/
   requirements.txt
   startup.sh
 frontend/
