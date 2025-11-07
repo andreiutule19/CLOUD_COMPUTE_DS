@@ -9,7 +9,11 @@ name: msdocs-python-fastapi-webapp-quickstart
 metadata:
   template: msdocs-python-fastapi-webapp-quickstart@0.0.1-beta
 services:
-  web:
-    project: .
+  api:
+    project: ./backend
+    language: python
+    host: appservice
+  frontend:
+    project: ./frontend
     language: python
     host: appservice

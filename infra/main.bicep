@@ -19,7 +19,8 @@ param location string
 //      "value": "myGroupName"
 // }
 param resourceGroupName string = ''
-param appServiceName string = ''
+param apiAppServiceName string = ''
+param frontendAppServiceName string = ''
 param appServicePlanName string = ''
 
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -50,19 +51,41 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 // Add resources to be provisioned below.
 
-// The application App
-module web './core/host/appservice.bicep' = {
-  name: 'web'
+// FastAPI backend App Service
+module api './core/host/appservice.bicep' = {
+  name: 'api'
   scope: rg
   params: {
-    name: !empty(appServiceName) ? appServiceName : '${abbrs.webSitesAppService}web-${resourceToken}'
+    name: !empty(apiAppServiceName) ? apiAppServiceName : '${abbrs.webSitesAppService}api-${resourceToken}'
     location: location
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: '3.13'
-    appCommandLine: 'gunicorn -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app'
+    appCommandLine: 'gunicorn -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 app.main:app'
     scmDoBuildDuringDeployment: true
-    tags: union(tags, { 'azd-service-name': 'web' })
+    tags: union(tags, { 'azd-service-name': 'api' })
+  }
+}
+
+// Streamlit frontend App Service
+module frontend './core/host/appservice.bicep' = {
+  name: 'frontend'
+  scope: rg
+  params: {
+    name: !empty(frontendAppServiceName) ? frontendAppServiceName : '${abbrs.webSitesAppService}frontend-${resourceToken}'
+    location: location
+    appServicePlanId: appServicePlan.outputs.id
+    runtimeName: 'python'
+    runtimeVersion: '3.13'
+    appCommandLine: 'python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0'
+    scmDoBuildDuringDeployment: true
+    tags: union(tags, { 'azd-service-name': 'frontend' })
+    appSettings: {
+      BACKEND_URL: api.outputs.uri
+      STREAMLIT_SERVER_PORT: '8000'
+      STREAMLIT_SERVER_ENABLECORS: 'false'
+      STREAMLIT_SERVER_HEADLESS: 'true'
+    }
   }
 }
 
@@ -90,4 +113,6 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
 // To see these outputs, run `azd env get-values`,  or `azd env get-values --output json` for json output.
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
+output API_BASE_URL string = api.outputs.uri
+output FRONTEND_BASE_URL string = frontend.outputs.uri
 
