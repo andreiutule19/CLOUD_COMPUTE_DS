@@ -24,6 +24,7 @@ with st.form("hello_form", clear_on_submit=False):
     name = st.text_input("What is your name?", value="Azure Developer")
     submitted = st.form_submit_button("Say hello")
 
+
     if submitted:
         if not name.strip():
             st.error("Please enter a non-empty name.")

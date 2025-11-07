@@ -14,6 +14,7 @@ class HelloResponse(BaseModel):
     message: str
 
 
+
 @app.get("/")
 async def read_root():
     return {"message": "Cloud Compute API is running"}
