@@ -20,6 +20,7 @@ def say_hello(name: str) -> dict[str, Any]:
     return response.json()
 
 
+
 with st.form("hello_form", clear_on_submit=False):
     name = st.text_input("What is your name?", value="Azure Developer")
     submitted = st.form_submit_button("Say hello")
